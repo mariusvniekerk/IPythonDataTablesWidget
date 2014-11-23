@@ -42,28 +42,36 @@
           div.append(table);
           this.$dt = table.DataTable({
               "columns": JSON.parse(this.model.get("_columns"))
+              "serverSide": true,
+              "ajax": this.server_side,
           });
 
           this.$el.append(div);
 
-          _.defer(_.bind(this.update, this));
+          //_.defer(_.bind(this.update, this));
 
           // returning `this` makes your view chainable
           return this;
         },
 
+        server_side: function(data, callback, settings) {
+            this.model.set("_data_request", JSON.stringify(data));
+            var data = JSON.parse(this.model.get("_data_response"));
+            callback(data);
+        }
+
         // Do things that are updated every time `this.model` is changed...
         // on the front-end or backend.
-        update: function(){
+        // update: function(){
 
-          var data = JSON.parse(this.model.get('_content'));
+        //   var data = JSON.parse(this.model.get('_content'));
 
-          this.$dt.rows.add(data);
-          this.$dt.draw();
+        //   this.$dt.rows.add(data);
+        //   this.$dt.draw();
 
-          // call __super__.update to handle housekeeping
-          return DataTablesView.__super__.update.apply(this);
-        }, // update
+        //   // call __super__.update to handle housekeeping
+        //   return DataTablesView.__super__.update.apply(this);
+        // }, // update
 
 
         // Tell Backbone to listen to the change event of input controls (which
