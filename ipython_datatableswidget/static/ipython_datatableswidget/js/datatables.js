@@ -41,9 +41,13 @@
           table.css('width', '100%');
           div.append(table);
           this.$dt = table.DataTable({
-              "columns": JSON.parse(this.model.get("_columns"))
+              "columns": JSON.parse(this.model.get("_columns")),
               "serverSide": true,
-              "ajax": this.server_side,
+              "ajax": function(data, callback, settings) {
+                that.model.set("_data_request", JSON.stringify(data));
+                that.$dtcallback = callback;
+                that.touch();
+              }
           });
 
           this.$el.append(div);
@@ -54,16 +58,16 @@
           return this;
         },
 
-        server_side: function(data, callback, settings) {
-            this.model.set("_data_request", JSON.stringify(data));
-            var data = JSON.parse(this.model.get("_data_response"));
-            callback(data);
-        }
-
         // Do things that are updated every time `this.model` is changed...
         // on the front-end or backend.
-        // update: function(){
-
+        update: function(){
+            var _data_response = this.model.get("_data_response");
+            if (_data_response) {
+              var data = JSON.parse(_data_response);
+              this.$dtcallback(data);
+              DataTablesView.__super__.update.apply(this);
+            }
+        },
         //   var data = JSON.parse(this.model.get('_content'));
 
         //   this.$dt.rows.add(data);
@@ -78,7 +82,7 @@
         // the HTML date picker is)
         events: {
           //'change input': 'dateChange'
-        }
+        },
 
         // Callback for when the date is changed.
 
